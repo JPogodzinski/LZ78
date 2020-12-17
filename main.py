@@ -1,61 +1,58 @@
-def compress(data):
+from math import log, ceil
+
+def compress(filename):
+    inputFile = open(filename, 'r')
+    name = "comp_" + filename
+    compressed = open(name, 'w')
+    inputRead = inputFile.read()
     D = {}
-    result = []
     n = 1
     c = ''
-    for i in data:
+    for i in repr(inputRead):
         if c + i not in D:
             if c == '':
-                result.append((0, i))
+                compressed.write('0/' + i + '\n')
                 D[i] = n
             else:
-                result.append((D[c], i))
+                compressed.write(str(D[c]) + '/' + i + '\n')
                 D[c + i] = n
             n += 1
             c = ''
         else:
             c = c + i
-    return result
+    inputFile.close()
+    compressed.close()
 
-def decompress(data):
-    D={}
-    n=1
-    result=[]
-    for i,s in data:
-        if i==0:
-            result.append(s)
-            D[n]=s
-            n+=1
+
+def decompress(filename):
+    compressedFile = open(filename, 'r')
+    name = "decomp_" + filename
+    decompressed = open(name, 'w')
+    compressedRead = compressedFile.readlines()
+    D = {}
+    n = 1
+    result = []
+    for line in compressedRead:
+        line = line[:-1]
+        line = line.split('/')
+        i=int(line[0])
+        if i == 0:
+            result.append(line[1])
+            D[n] = line[1]
+            n += 1
         else:
             result.append(D[i])
-            result.append(s)
-            D[n] = (D[i]+s)
+            result.append(line[1])
+            D[n] = (D[i] + line[1])
             n += 1
-    return ''.join(result)
+    decompressed.write(str(''.join(result)))
+    compressedFile.close()
+    decompressed.close()
 
-def openFile(name):
-    D=''
-    f=open(name,"r")
-    for x in f:
-        D+=x
-    f.close()
-    return D
 
-def writeFile(name, compressed):
-    name="comp_"+name
-    print(name)
-    f = open(name, "w")
-    f.write(str(compressed))
-    f.close()
 
 if __name__ == '__main__':
-    filename="small.txt"
-    data=openFile(filename)
-    print(data)
-    compressed=compress(data)
-    print(compressed)
-    writeFile(filename,compressed)
-    decompressed=decompress(compressed)
-    print(decompressed)
-
-
+    filename = 'macbeth3.txt'
+    compress(filename)
+    name = "comp_" + filename
+    decompress(name)
